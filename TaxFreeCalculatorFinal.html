@@ -1,0 +1,181 @@
+<!-- Tax Refund Calculator (Full Version for Copy-Paste) -->
+<div id=\"tax-calculator\" oncontextmenu=\"return false\" onselectstart=\"return false\" class="light-mode" style="max-width: 460px; margin: 20px auto; font-family: sans-serif; border: 1px solid #ddd; border-radius: 10px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: relative; box-sizing: border-box;">
+  <button onclick="tT()" id="themeToggle" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 18px; cursor: pointer;">🌙</button>
+  <h3 style="margin-top: 0; text-align: center;">🧾 Tax Refund Calculator</h3>
+  <p style="margin: 8px 0; font-size: 14px;">Check your refund amount.</p>
+
+  <label for="amount" style="display: block; margin: 12px 0 6px; font-weight: bold;">💳 Purchase Amount (₩)</label>
+  <input type="number" id="amount" placeholder="e.g. 150000" style="width: calc(100% - 2px); padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box;">
+
+  <div style="margin-top: 16px; display: flex; gap: 10px;">
+    <button onclick="calculateRefund()" style="flex: 1; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; font-size: 15px;">Check</button>
+    <button onclick="resetForm()" style="flex: 1; padding: 10px; background: #f44336; color: white; border: none; border-radius: 6px; font-size: 15px;">Reset</button>
+  </div>
+
+  <div id="result" style="margin-top: 20px; display: none; font-size: 15px; line-height: 1.6; border-top: 1px dashed #ccc; padding-top: 16px;"></div>
+  <p style="margin-top: 12px; font-size: 13px; color: gray; text-align: center;">
+    * This result is for reference only. Actual refund amounts may vary slightly depending on the tax refund provider.<br>
+    © 2025 <strong>Alvin Travel</strong>. All rights reserved.
+  </p>
+</div>
+
+<script>
+const table = [
+  { min: 15000, max: 29999, cube: 1000 },
+  { min: 30000, max: 49999, all: 2000, cube: 1500 },
+  { min: 50000, max: 74999, all: 3000, cube: 3500 },
+  { min: 75000, max: 99999, all: 5000, cube: 5000 },
+  { min: 100000, max: 124999, all: 6000, cube: 6000 },
+  { min: 125000, max: 149999, all: 8000, cube: 7500 },
+  { min: 150000, max: 174999, all: 9000, cube: 9000 },
+  { min: 175000, max: 199999, all: 10000, cube: 10000 },
+  { min: 200000, max: 224999, all: 12000, cube: 12000 },
+  { min: 225000, max: 249999, all: 13000, cube: 13500 },
+  { min: 250000, max: 274999, all: 15000, cube: 15500 },
+  { min: 275000, max: 299999, all: 17000, cube: 17000 },
+  { min: 300000, max: 324999, all: 19000, cube: 19000 },
+  { min: 325000, max: 349999, all: 21000, cube: 21000 },
+  { min: 350000, max: 374999, all: 23000, cube: 23000 },
+  { min: 375000, max: 399999, all: 25000, cube: 24500 },
+  { min: 400000, max: 424999, all: 27000, cube: 26000 },
+  { min: 425000, max: 449999, all: 28000, cube: 28000 },
+  { min: 450000, max: 474999, all: 30000, cube: 30000 },
+  { min: 475000, max: 499999, all: 32000, cube: 32000 },
+  { min: 500000, max: 549999, all: 35000, cube: 35000 },
+  { min: 550000, max: 599999, all: 37000, cube: 38000 },
+  { min: 600000, max: 649999, all: 41000, cube: 42000 },
+  { min: 650000, max: 699999, all: 45000, cube: 46000 },
+  { min: 700000, max: 749999, all: 50000, cube: 50000 },
+  { min: 750000, max: 799999, all: 53000, cube: 53000 },
+  { min: 800000, max: 849999, all: 57000, cube: 57000 },
+  { min: 850000, max: 899999, all: 60000, cube: 61000 },
+  { min: 900000, max: 949999, all: 65000, cube: 65000 },
+  { min: 950000, max: 999999, all: 68000, cube: 68000 },
+  { min: 1000000, max: 1099999, all: 74000, cube: 74000 },
+  { min: 1100000, max: 1199999, all: 80000, cube: 82000 },
+  { min: 1200000, max: 1299999, all: 90000, cube: 90000 },
+  { min: 1300000, max: 1399999, all: 95000, cube: 97000 },
+  { min: 1400000, max: 1499999, all: 104000, cube: 104000 },
+  { min: 1500000, max: 1599999, all: 110000, cube: 112000 },
+  { min: 1600000, max: 1699999, all: 115000, cube: 119000 },
+  { min: 1700000, max: 1799999, all: 127000, cube: 127000 },
+  { min: 1800000, max: 1899999, all: 135000, cube: 134000 },
+  { min: 1900000, max: 1999999, all: 140000, cube: 141000 },
+  { min: 2000000, max: 2099999, all: 150000, cube: 149000 },
+  { min: 2100000, max: 2199999, all: 155000, cube: 155000 },
+  { min: 2200000, max: 2299999, all: 160000, cube: 160000 },
+  { min: 2300000, max: 2399999, all: 170000, cube: 170000 },
+  { min: 2400000, max: 2499999, all: 177000, cube: 177000 },
+  { min: 2500000, max: 2599999, all: 185000, cube: 185000 },
+  { min: 2600000, max: 2699999, all: 190000, cube: 192000 },
+  { min: 2700000, max: 2799999, all: 200000, cube: 200000 },
+  { min: 2800000, max: 2899999, all: 210000, cube: 208000 },
+  { min: 2900000, max: 2999999, all: 215000, cube: 215000 },
+  { min: 3000000, max: 3099999, all: 225000, cube: 223000 },
+  { min: 3100000, max: 3199999, all: 230000, cube: 231000 },
+  { min: 3200000, max: 3299999, all: 235000, cube: 238000 },
+  { min: 3300000, max: 3399999, all: 240000, cube: 246000 },
+  { min: 3400000, max: 3499999, all: 250000, cube: 255000 },
+  { min: 3500000, max: 3599999, all: 260000, cube: 262000 },
+  { min: 3600000, max: 3699999, all: 270000, cube: 270000 },
+  { min: 3700000, max: 3799999, all: 280000, cube: 278000 },
+  { min: 3800000, max: 3899999, all: 285000, cube: 286000 },
+  { min: 3900000, max: 3999999, all: 290000, cube: 294000 },
+  { min: 4000000, max: 4099999, all: 300000, cube: 303000 },
+  { min: 4100000, max: 4199999, all: 310000, cube: 310000 },
+  { min: 4200000, max: 4299999, all: 315000, cube: 318000 },
+  { min: 4300000, max: 4399999, all: 320000, cube: 325000 },
+  { min: 4400000, max: 4499999, all: 333000, cube: 333000 },
+  { min: 4500000, max: 4599999, all: 340000, cube: 344000 },
+  { min: 4600000, max: 4699999, all: 350000, cube: 352000 },
+  { min: 4700000, max: 4799999, all: 360000, cube: 360000 },
+  { min: 4800000, max: 4899999, all: 370000, cube: 370000 },
+  { min: 4900000, max: 4999999, all: 380000, cube: 380000 },
+  { min: 5000000, max: 5099999, all: 390000, cube: 390000 },
+  { min: 5100000, max: 5199999, all: 400000, cube: 400000 },
+  { min: 5200000, max: 5299999, all: 410000, cube: 410000 },
+  { min: 5300000, max: 5399999, all: 420000, cube: 420000 },
+  { min: 5400000, max: 5499999, all: 430000, cube: 430000 },
+  { min: 5500000, max: 5599999, all: 440000, cube: 440000 },
+  { min: 5600000, max: 5699999, all: 450000, cube: 450000 },
+  { min: 5700000, max: 5799999, all: 460000, cube: 460000 },
+  { min: 5800000, max: 5899999, all: 470000, cube: 470000 },
+  { min: 5900000, max: 5999999, all: 480000, cube: 480000 }
+];
+
+function findRefund(type, amount) {
+  if (amount >= 6000000) {
+    const refund = Math.floor((amount * 0.0818) / 1000) * 1000;
+    return `₩${refund.toLocaleString()} (est.)`;
+  }
+  for (let row of table) {
+    if (amount >= row.min && amount <= row.max) {
+      if (type === 'cube') return row.cube ? `₩${row.cube.toLocaleString()}` : "No Data";
+      else return row.all ? `₩${row.all.toLocaleString()}` : "No Data";
+    }
+  }
+  return "No Data";
+}
+
+function calculateRefund() {
+  const amount = parseInt(document.getElementById("amount").value);
+  const result = document.getElementById("result");
+
+  if (isNaN(amount) || amount <= 0) {
+    result.style.display = 'block';
+    result.innerHTML = "<span style='color:red;'>⚠️ Please enter a valid amount.</span>";
+    return;
+  }
+
+  const nice = findRefund('nice', amount);
+  const global = findRefund('global', amount);
+  const cube = findRefund('cube', amount);
+
+  result.style.display = 'block';
+  result.innerHTML = `
+    <div><strong>Nice Tax Free:</strong> ${nice}</div>
+    <div><strong>Global Tax Free:</strong> ${global}</div>
+    <div><strong>Cube Tax Free:</strong> ${cube}</div>
+  `;
+}
+
+function resetForm() {
+  document.getElementById('amount').value = '';
+  const result = document.getElementById('result');
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+
+function tT(){const e=document.getElementById("tax-calculator"),t=document.getElementById("themeToggle"),n=e.classList.contains("light-mode");n?(e.classList.remove("light-mode"),e.classList.add("dark-mode"),t.innerHTML="☀️"):(e.classList.remove("dark-mode"),e.classList.add("light-mode"),t.innerHTML="🌙")} else {
+    wrapper.classList.remove("dark-mode");
+    wrapper.classList.add("light-mode");
+    toggleBtn.innerHTML = "🌙";
+  }
+}
+</script>
+
+<style>
+#tax-calculator.light-mode {
+  background: #fff;
+  color: #000;
+}
+#tax-calculator.dark-mode {
+  background: #1e1e1e;
+  color: #f1f1f1;
+  border-color: #444;
+}
+#tax-calculator.dark-mode input {
+  background: #2a2a2a;
+  color: #f1f1f1;
+  border-color: #555;
+}
+#tax-calculator.dark-mode button {
+  color: white;
+}
+#tax-calculator.dark-mode #result {
+  border-top-color: #666;
+}
+#tax-calculator.dark-mode p {
+  color: #ccc;
+}
+</style>
